@@ -2,42 +2,6 @@
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .cardSection {
   width: 50%;
   display: flex;
@@ -52,18 +16,28 @@
 }
 
 .gameButton {
-  background-color: #F084E4;
+  background-color: #0054ff;
   border: none;
-  border-radius: 8px;
   padding: 10px 24px;
-  font-size: 12px;
+  font-size: 18px;
   color: white;
   font-weight: bold;
+  border-radius: 12px;
 }
 
 .gameButtons {
   display: flex;
   justify-content: space-evenly;
+  width: 100%;
+}
+
+.gameBoard {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 100%;
 }
 
 .game {
@@ -72,14 +46,8 @@
   height: 500px;
   margin-left: 80px;
   display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-
-}
-
-.cardSectionWrapper {
-  display: flex;
-  justify-content: space-around;
+  flex-direction: row;
+  justify-content: space-evenly;
   align-items: center;
 }
 
@@ -94,4 +62,29 @@
 
 .card:last-child {
   flex: 0 0 auto;
+}
+
+.scoreBoard {
+  height: 100%;
+  justify-content: space-evenly;
+  display: flex;
+  flex-direction: column;
+}
+
+.dealButton {
+  width: 300px;
+  height: 70px;
+  border: none;
+  background-image: radial-gradient(100% 100% at 100% 0, red 0, darkred 100%);
+  font-weight: 800;
+  font-family: inherit;
+  font-size: larger;
+  background-color: palevioletred;
+  border-radius: 20px;
+  color: white;
+}
+
+h1 {
+  text-align: center;
+  color: white
 }

@@ -1,7 +1,6 @@
-import React, { Component, useState } from 'react';
+import React, { Component } from 'react';
 import { Button, Card } from 'react-bootstrap';
 import './App.css';
-import Modal from '@material-ui/core/Modal';
 
 const aceCodes = ["AC", "AS", "AH", "AD"]
 
@@ -38,12 +37,11 @@ class App extends Component {
   }
 
   async startGame() {
-    // create deck if doesn't alredy exist & shuffle cards
+    // create deck if doesn't already exist & shuffle cards
     var currDeckId = this.state.deckId
     if (!currDeckId) {
       const url = "https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1";
       const responseBody = await (await fetch(url)).json()
-      console.log(responseBody, 'response')
       currDeckId = responseBody?.deck_id
     } else {
       // return cards from previous hand to deck
@@ -54,11 +52,6 @@ class App extends Component {
       await fetch(url)
     }
 
-    this.setState({
-      ...this.state,
-      deckId: currDeckId
-    })
-
     // Draw 2 initial Cards for house & player
     const cardsDrawn = await this.drawCard(4, currDeckId)
     const firstDrawn = cardsDrawn.cards[0]
@@ -67,6 +60,9 @@ class App extends Component {
     const fourthDrawn = cardsDrawn.cards[3]
     this.setState({
       ...this.state,
+      deckId: currDeckId,
+      gameStarted: true,
+      endGameResult: "",
       houseCards: [...this.state.houseCards,
       { img: firstDrawn.image, code: firstDrawn.code, value: firstDrawn.value },
       { img: secondDrawn.image, code: secondDrawn.code, value: secondDrawn.value }],
@@ -117,9 +113,8 @@ class App extends Component {
       houseScore: houseCount,
       playerScore: playerCount
     }, () => {
-      if (houseCount > 21 || playerCount > 21 || isStand) {
-        console.log(houseCount, playerCount, 'what', this.state)
-        //  this.determineWinner(houseCount, playerCount)
+      if (playerCount > 21 || isStand) {
+        this.determineWinner(houseCount, playerCount)
       }
     })
 
@@ -128,53 +123,53 @@ class App extends Component {
 
 
   determineWinner(houseCount, playerCount) {
+    var endGameResult = ""
+    if (playerCount > houseCount && playerCount <= 21) {
+      endGameResult = "You win!"
+    }
+    else {
+      endGameResult = "House wins!"
+    }
+
     this.setState({
       ...this.state,
       playerCards: [],
       houseCards: [],
-      gameStarted: false
+      gameStarted: false,
+      endGameResult: endGameResult
     })
-
-    var endGameResults = ""
-    if (playerCount > houseCount && playerCount <= 21) {
-      endGameResults = "You win!"
-    }
-    else {
-      endGameResults = "House wins!"
-    }
   }
 
   render() {
     return (
-      <div>
-        <Button className="gameButton" onClick={() => this.startGame()}>Deal</Button>
-        <div className="game">
-          <div className="cardSectionWrapper">
-            <div className="cardSection">
-              {this.state.houseCards.map((card) => (
-                <Card className="card">
-                  <img className="cardImage" src={card.img}></img>
-                </Card>
-              ))}
-            </div>
-            <div className="score">{this.state.houseScore} Dealer</div>
+      <div className="game">
+        <div className="gameBoard">
+          <div className="cardSection">
+            {this.state.houseCards.map((card) => (
+              <Card className="card">
+                <img className="cardImage" src={card.img}></img>
+              </Card>
+            ))}
           </div>
           <div className="gameButtons">
-            <Button className="gameButton" onClick={() => this.hit()}>HIT</Button>
-            <Button className="gameButton" onClick={() => this.evaluateScores(true)}>Stand</Button>
-          </div>
-          <div>
-            <div className="cardSectionWrapper">
-              <div className="cardSection">
-                {this.state.playerCards.map((card) => (
-                  <Card className="card">
-                    <img src={card.img} className="cardImage"></img>
-                  </Card>
-                ))}
-              </div>
-              <div className="score">{this.state.playerScore} Your Cards</div>
+            {this.state.gameStarted && <Button className="gameButton" onClick={() => this.hit()}>HIT</Button>}
+            <div>
+              {!this.state.gameStarted && <h1>{this.state.endGameResult}</h1>}
+              {!this.state.gameStarted && <Button className="dealButton" onClick={() => this.startGame()}>Deal</Button>}
             </div>
+            {this.state.gameStarted && <Button className="gameButton" onClick={() => this.evaluateScores(true)}>STAND</Button>}
           </div>
+          <div className="cardSection">
+            {this.state.playerCards.map((card) => (
+              <Card className="card">
+                <img src={card.img} className="cardImage"></img>
+              </Card>
+            ))}
+          </div>
+        </div>
+        <div className="scoreBoard">
+          <h2 className="score">Dealer: {this.state.houseScore} points</h2>
+          <h2 className="score">You: {this.state.playerScore} points</h2>
         </div>
       </div>
     );
