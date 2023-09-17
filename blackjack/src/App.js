@@ -20,7 +20,7 @@ class App extends Component {
 
   async hit() {
     const cardsDrawn = await this.drawCard(1, this.state.deckId)
-    const firstDrawn = cardsDrawn.cards[0]
+    const firstDrawn = cardsDrawn[0]
     this.setState({
       ...this.state,
       playerCards: [...this.state.playerCards, {
@@ -33,7 +33,25 @@ class App extends Component {
   async drawCard(count, deckId) {
     const url = "https://deckofcardsapi.com/api/deck/" + deckId + "/draw/?count=" + count;
     const response = await fetch(url)
-    return await response.json()
+    var json = await response.json()
+    return this.mapValues(json.cards)
+  }
+
+  mapValues(cards) {
+    cards = cards.map(card => {
+      var value = card.value
+      if (aceCodes.includes(card.code)) {
+        value = 1
+      } else if (!parseInt(card.value)) {
+        value = 10
+      }
+
+      return {
+        ...card,
+        value: parseInt(value)
+      }
+    })
+    return cards
   }
 
   async startGame() {
@@ -54,10 +72,10 @@ class App extends Component {
 
     // Draw 2 initial Cards for house & player
     const cardsDrawn = await this.drawCard(4, currDeckId)
-    const firstDrawn = cardsDrawn.cards[0]
-    const secondDrawn = cardsDrawn.cards[1]
-    const thirdDrawn = cardsDrawn.cards[2]
-    const fourthDrawn = cardsDrawn.cards[3]
+    const firstDrawn = cardsDrawn[0]
+    const secondDrawn = cardsDrawn[1]
+    const thirdDrawn = cardsDrawn[2]
+    const fourthDrawn = cardsDrawn[3]
     this.setState({
       ...this.state,
       deckId: currDeckId,
@@ -77,16 +95,17 @@ class App extends Component {
     // recalc scores and end game if necessary
 
     // Sort cards to ensure aces are counted at the end
-    this.state.playerCards.sort()
-    this.state.houseCards.sort()
+    this.state.playerCards.sort(function (a, b) { return b.value - a.value })
+    this.state.houseCards.sort(function (a, b) { return b.value - a.value })
 
     // Calc Player Score
     var playerCount = 0;
-    this.state.playerCards.forEach((card) => {
+    this.state.playerCards.forEach((card, idx, array) => {
       if (!aceCodes.includes(card.code)) {
-        playerCount = playerCount + (parseInt(card.value) || 10)
+        playerCount = playerCount + card.value
       } else {
-        if (playerCount + 11 <= 21) {
+        if ((idx == array.length - 1) && (playerCount + 11 <= 21)) {
+          // only value last ACE in list as 11 since can't have more than 1 ace as 11 and be <21
           playerCount = playerCount + 11
         } else {
           playerCount++;
@@ -96,11 +115,11 @@ class App extends Component {
 
     // Calc House Score
     var houseCount = 0
-    this.state.houseCards.forEach((card) => {
+    this.state.houseCards.forEach((card, idx, array) => {
       if (!aceCodes.includes(card.code)) {
-        houseCount = houseCount + (parseInt(card.value) || 10)
+        houseCount = houseCount + card.value
       } else {
-        if (houseCount + 11 <= 21) {
+        if ((idx == array.length - 1) && (houseCount + 11 <= 21)) {
           houseCount = houseCount + 11
         } else {
           houseCount++;
